@@ -26,6 +26,12 @@ public class EmblemWars implements ApplicationListener {
 	private Sprite levelSprite;
 	private GameInputProcessor inputProcessor;
 	
+	// This will be used to keep track of the different game states
+	// gameState = 1 : Player turn
+	// gameState = 2 : Enemy turn
+	// gameState = 3 : Game Paused
+	private int gameState = 1;
+	
 	private static final int        FRAME_COLS = 20;         
     private static final int        FRAME_ROWS = 1;         
     
@@ -114,7 +120,6 @@ public class EmblemWars implements ApplicationListener {
 		soldierSprite.setPosition(320, 256);
 		
 		font = new BitmapFont();
-		Button button = new Button();
 
 		shapeRenderer = new ShapeRenderer();
 
@@ -132,9 +137,12 @@ public class EmblemWars implements ApplicationListener {
 		}
 		
 		playerUnits = new Unit[8];
-		for (int i = 0; i < playerUnits.length; i++){
-			playerUnits[i] = new Unit("Soldier",320,256,13,5,4,3);
-		}
+		
+		playerUnits[1] = new Unit("Soldier",320,256,13,5,4,3,false);
+		
+//		for (int i = 0; i < playerUnits.length; i++){
+//			playerUnits[i] = new Unit("Soldier",320,256,13,5,4,3);
+//		}
 
 		GameInputProcessor inputProcessor = new GameInputProcessor(game);
 		Gdx.input.setInputProcessor(inputProcessor);
@@ -171,37 +179,43 @@ public class EmblemWars implements ApplicationListener {
 			Vector3 touchpoint = new Vector3();
 			camera.unproject(touchpoint.set(x, y, 0));
 
-			if (touchpoint.x > soldierSprite.getX()
-					&& touchpoint.x < (soldierSprite.getX() + soldierSprite
-							.getWidth())
-					&& touchpoint.y > soldierSprite.getY()
-					&& touchpoint.y < (soldierSprite.getY() + soldierSprite
-							.getHeight()) && soldierIsSelected == true) {
-				soldierIsSelected = false;
-				displayTurnPrompt = false;
+			if (gameState == 1) { // Player Turn
+				if (touchpoint.x > soldierSprite.getX()
+						&& touchpoint.x < (soldierSprite.getX() + soldierSprite
+								.getWidth())
+						&& touchpoint.y > soldierSprite.getY()
+						&& touchpoint.y < (soldierSprite.getY() + soldierSprite
+								.getHeight()) && soldierIsSelected == true) {
+					soldierIsSelected = false;
+					displayTurnPrompt = false;
 
-				for (int i = 0; i < tiles.length; i++) {
-					for (int j = 0; j < tiles[1].length; j++) {
-						tiles[i][j].setMoveable(0);
+					for (int i = 0; i < tiles.length; i++) {
+						for (int j = 0; j < tiles[1].length; j++) {
+							tiles[i][j].setMoveable(0);
+						}
 					}
+				} else if (soldierIsSelected) {
+
+					moveToClosestTile(touchpoint.x, touchpoint.y, soldierSprite);
+					displayTurnPrompt = true;
+					// soldierIsSelected = false;
+
+				} else if (touchpoint.x > soldierSprite.getX()
+						&& touchpoint.x < (soldierSprite.getX() + soldierSprite
+								.getWidth())
+						&& touchpoint.y > soldierSprite.getY()
+						&& touchpoint.y < (soldierSprite.getY() + soldierSprite
+								.getHeight()) && soldierIsSelected == false) {
+					soldierIsSelected = true;
+					tiles[tI][tJ].setMoveable(1);
+					createMovementRange(3);
+				} else {
+					soldierIsSelected = false;
 				}
-			} else if (soldierIsSelected) {
-
-				moveToClosestTile(touchpoint.x, touchpoint.y, soldierSprite);
-				displayTurnPrompt = true;
-				// soldierIsSelected = false;
-
-			} else if (touchpoint.x > soldierSprite.getX()
-					&& touchpoint.x < (soldierSprite.getX() + soldierSprite
-							.getWidth())
-					&& touchpoint.y > soldierSprite.getY()
-					&& touchpoint.y < (soldierSprite.getY() + soldierSprite
-							.getHeight()) && soldierIsSelected == false) {
-				soldierIsSelected = true;
-				tiles[tI][tJ].setMoveable(1);
-				createMovementRange(3);
-			} else {
-				soldierIsSelected = false;
+			}else if (gameState == 2) { // Enemy Turn
+				//eventually, holding your finger or mouse down will speed up the enemy turn
+			}else if (gameState == 3) { // Pause
+				//include controls for the paused game
 			}
 
 			return false;
@@ -228,7 +242,6 @@ public class EmblemWars implements ApplicationListener {
 
 		@Override
 		public boolean keyDown(int keycode) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 	}

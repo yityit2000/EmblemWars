@@ -3,9 +3,10 @@ package com.dvoragames.emblemwars2;
 public class Unit {
 	
 	private static int health, attack, defence, range, xpos, ypos;
+	private static boolean selected;
 	private static String type;
 	
-	public Unit( String t, int x, int y, int h,int a,int d,int r) {
+	public Unit( String t, int x, int y, int h,int a,int d,int r,boolean s) {
 		xpos = x;
 		ypos = y;
 		health = h;
@@ -13,6 +14,15 @@ public class Unit {
 		defence = d;
 		range = r;
 		type  = t;
+		selected = s;
+	}
+
+	public static boolean isSelected() {
+		return selected;
+	}
+
+	public static void setSelected(boolean selected) {
+		Unit.selected = selected;
 	}
 
 	public static int getXpos() {
